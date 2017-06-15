@@ -6,23 +6,30 @@
 	var $cerrarCrear = $("#cerrarCrear");
 	var $contTemas = $('#temas');
 	var $verRespuestas = $('.verRespuestas');
+	var $form = $('#search-form');
+	var $btnCrearNvo = $('#crearNuevoTema');
+
 
 //Función cargarPagina. Cargará toda la funcionalidad de la página
 	var cargarPagina = function(){
 		cargarDatos();
 		$btnCrear.click(mostrarFormulario);
 		$cerrarCrear.click(cerrarFormulario);
+		$form.submit(filtrarTemas);
+		$btnCrearNvo.click(agregarTema);
+		$('#form-crear').submit(prevent);
+
 	};
 
-//Función que muestra el formulario para agregar contenido
+//Función que MUESTRA el formulario para agregar contenido
 	var mostrarFormulario = function(){
 		$contForm.removeClass("hide");
 	}
-//Función que cierra el formulario para crear tema.
+//Función que CIERRA el formulario de crear tema.
 	var cerrarFormulario = function(){
 		$contForm.addClass("hide");
 	}
-//Plantilla para crear los temas en el dom.
+//Plantilla para CREA los temas en el dom.
 	var plantillaDom = '<div class="row">'+
               				'<div class="card white col s10 offset-s1 hoverable">'+
                 				'<div class="card-content ">'+
@@ -34,21 +41,57 @@
                  					'</div>'+
               					'</div>'+
             				'</div>';
-//Función que obtiene los datos principales de API
+//Función que OBTIENE DATOS  principales de API
 	var cargarDatos = function(){
 		$.getJSON(url_api, function (temas) {
     	temas.forEach(crearTema);
   		});
 	}
-//Función que creará los temas en el html
+//Función que CREA los temas en el html
 	var crearTema = function(response){
 		var autor = response.author_name;
 		var tema = response.content;
-
-		var plantillaNueva = plantillaDom.replace("**tema**", tema).replace("**no.Respuestas**", 0)
+		var respuestas = response.responses_count;
+		var plantillaNueva = plantillaDom.replace("**tema**", tema).replace("**no.Respuestas**", respuestas)
 							.replace("**autor**", autor);
 
 		$contTemas.append(plantillaNueva);
 	}
+//Función AGREGAR TEMA
+	var agregarTema = function(){
+		var autor = $('#input_text').val();
+		var tema = $('#input_text2').val();
+		$.post(url_api, {
+		    author_name: autor,
+		    content: tema
+		  }, function (tema) {
+		    cargarDatos(tema);
+		    cerrarFormulario();
+		  });
+	}
+
+//Función prevent Default
+	var prevent = function(e){
+		e.preventDefault();
+	}
+//Función que FILTRA búsqueda de temas NO FUNCIONAN
+	var filtrarTemas = function(e){
+		e.preventDefault();
+		var criterio = $('#search').val().toLowerCase();
+		$.getJSON(url_api, function (temas) {
+    	temas.filter(function(response){
+    		var temas = response.content.toLowerCase();
+    			return temas == criterio;
+    		});
+  		});
+  	}
+//Función que muestra los restaurantes Filtrados NO FUNCIONAN
+  	var mostrarTemas = function(temas, criterio){
+  		console.log(temas, criterio);
+  		var temasFiltrados = temas.filter(function(tema){
+  			restaurante.indexOf(criterio)>=0;
+  		})
+
+  	}
 $(document).ready(cargarPagina);
 })();
