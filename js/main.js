@@ -1,5 +1,5 @@
 (function(){
-//Declaración de variables generales 
+//VARIABLES GLOBALES
 	var url_api = 'http://examen-laboratoria-sprint-5.herokuapp.com/topics';
 	var $btnCrear = $('#crearTema');
 	var $contForm = $("#contenedorForm");
@@ -8,28 +8,31 @@
 	var $verRespuestas = $('.verRespuestas');
 	var $form = $('#search-form');
 	var $btnCrearNvo = $('#crearNuevoTema');
-
-
-//Función cargarPagina. Cargará toda la funcionalidad de la página
+	var arrayTemas = [];
+	var $encontrados = $('#elementosEncontrados');
+	var $noElementos = $('#noElementos');
+	var $volver = $('#volver');
+//Función CARGAR PAGINA. Cargará toda la funcionalidad de la página
 	var cargarPagina = function(){
 		cargarDatos();
 		$btnCrear.click(mostrarFormulario);
 		$cerrarCrear.click(cerrarFormulario);
+		$form.submit(mostrarSecEncontrados);
 		$form.submit(filtrarTemas);
 		$btnCrearNvo.click(agregarTema);
 		$('#form-crear').submit(prevent);
+		$volver.click(mostrarTodos);
 
 	};
-
-//Función que MUESTRA el formulario para agregar contenido
+//Función MOSTRAR FORMULARIO para agregar contenido
 	var mostrarFormulario = function(){
 		$contForm.removeClass("hide");
 	}
-//Función que CIERRA el formulario de crear tema.
+//Función CERRAR FORMULARIO de crear tema.
 	var cerrarFormulario = function(){
 		$contForm.addClass("hide");
 	}
-//Plantilla para CREA los temas en el dom.
+//Plantilla DOM.
 	var plantillaDom = '<div class="row">'+
               				'<div class="card white col s10 offset-s1 hoverable">'+
                 				'<div class="card-content ">'+
@@ -41,13 +44,17 @@
                  					'</div>'+
               					'</div>'+
             				'</div>';
-//Función que OBTIENE DATOS  principales de API
+//Función CARGAR DATOS. Carga los datos principales de API
 	var cargarDatos = function(){
 		$.getJSON(url_api, function (temas) {
     	temas.forEach(crearTema);
+    	temas.forEach(function(tema){
+    		arrayTemas.push(tema.content)
+    		});
   		});
-	}
-//Función que CREA los temas en el html
+  		console.log(arrayTemas);
+	};
+//Función CREAR TEMA en el html
 	var crearTema = function(response){
 		var autor = response.author_name;
 		var tema = response.content;
@@ -56,7 +63,7 @@
 							.replace("**autor**", autor);
 
 		$contTemas.append(plantillaNueva);
-	}
+	};
 //Función AGREGAR TEMA
 	var agregarTema = function(){
 		var autor = $('#input_text').val();
@@ -69,29 +76,43 @@
 		    cerrarFormulario();
 		  });
 	}
-
-//Función prevent Default
+//Función PREVENT DEFAULT
 	var prevent = function(e){
 		e.preventDefault();
 	}
-//Función que FILTRA búsqueda de temas NO FUNCIONAN
+//Función FILTRAR ITEMS
 	var filtrarTemas = function(e){
 		e.preventDefault();
 		var criterio = $('#search').val().toLowerCase();
-		$.getJSON(url_api, function (temas) {
-    	temas.filter(function(response){
-    		var temas = response.content.toLowerCase();
-    			return temas == criterio;
-    		});
-  		});
-  	}
-//Función que muestra los restaurantes Filtrados NO FUNCIONAN
-  	var mostrarTemas = function(temas, criterio){
-  		console.log(temas, criterio);
-  		var temasFiltrados = temas.filter(function(tema){
-  			restaurante.indexOf(criterio)>=0;
-  		})
+		$.getJSON(url_api, function (tema) {
+	    	var temitas = 	tema.filter(function(response){
+	    			//console.log(response.content);
+	    			return (response.content).toLowerCase().indexOf(criterio)>=0;
+	    			});	
+	    	$noElementos.text(temitas.length);
+	    	temitas.forEach(mostrarTemas);
+		});	
+		
+  	};
+//Función MOSTRAR ITEMS filtrados
+  	var mostrarTemas = function(response, i){
+		var autor = response.author_name;
+		var tema = response.content;
+		var respuestas = response.responses_count;
+		var plantillaNueva = plantillaDom.replace("**tema**", tema).replace("**no.Respuestas**", respuestas)
+							.replace("**autor**", autor);
 
-  	}
+		$encontrados.append(plantillaNueva);
+  	};
+//Función MOSTRARSECENCONTRADOS Mostrar sección de elementos encontrados 
+	var mostrarSecEncontrados = function(){
+		$encontrados.removeClass("hide");
+		$contTemas.addClass("hide");
+	};
+//Función MOSTRAR TODOS los elementos
+	var mostrarTodos = function(){
+		$contTemas.removeClass("hide");
+		$encontrados.addClass("hide");
+	};
 $(document).ready(cargarPagina);
 })();
