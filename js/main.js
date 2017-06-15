@@ -85,7 +85,7 @@
 	var filtrarTemas = function(e){
 		e.preventDefault();
 		var criterio = $('#search').val().toLowerCase();
-		var plantillaNueva;
+		var plantillaNueva="";
 		$.getJSON(url_api, function (tema) {
 	    	var temitas = 	tema.filter(function(response){
 	    			//console.log(response.content);
