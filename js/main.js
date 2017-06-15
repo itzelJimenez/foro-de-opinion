@@ -95,14 +95,20 @@
     			//console.log(response.content);
     			return (response.content).toLowerCase().indexOf(criterio)>=0;
     			});	
-    	mostrarTemas(temitas);
+    	console.log(temitas);
+    	temitas.forEach(mostrarTemas);
 		});	
 		
   	}
 //Función que muestra los restaurantes Filtrados NO FUNCIONAN
-  	var mostrarTemas = function(temitas){
-  		console.log(temitas);
-  		temitas.forEach(crearTema);
+  	var mostrarTemas = function(response){
+		var autor = response.author_name;
+		var tema = response.content;
+		var respuestas = response.responses_count;
+		var plantillaNueva = plantillaDom.replace("**tema**", tema).replace("**no.Respuestas**", respuestas)
+							.replace("**autor**", autor);
+
+		$contTemas.html(plantillaNueva);
   	}
 $(document).ready(cargarPagina);
 })();
