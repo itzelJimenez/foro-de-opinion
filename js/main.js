@@ -8,7 +8,7 @@
 	var $verRespuestas = $('.verRespuestas');
 	var $form = $('#search-form');
 	var $btnCrearNvo = $('#crearNuevoTema');
-
+	var arrayTemas = [];
 
 //Función cargarPagina. Cargará toda la funcionalidad de la página
 	var cargarPagina = function(){
@@ -45,7 +45,11 @@
 	var cargarDatos = function(){
 		$.getJSON(url_api, function (temas) {
     	temas.forEach(crearTema);
+    	temas.forEach(function(tema){
+    		arrayTemas.push(tema.content)
+    		});
   		});
+  		console.log(arrayTemas);
 	}
 //Función que CREA los temas en el html
 	var crearTema = function(response){
@@ -69,7 +73,6 @@
 		    cerrarFormulario();
 		  });
 	}
-
 //Función prevent Default
 	var prevent = function(e){
 		e.preventDefault();
@@ -78,20 +81,28 @@
 	var filtrarTemas = function(e){
 		e.preventDefault();
 		var criterio = $('#search').val().toLowerCase();
-		$.getJSON(url_api, function (temas) {
-    	temas.filter(function(response){
-    		var temas = response.content.toLowerCase();
-    			return temas == criterio;
-    		});
-  		});
+		/*var temasFiltrados = arrayTemas.filter(function(tema, i){
+			var prueba=tema.toLowerCase().indexOf(criterio)>=0;
+			console.log(prueba);
+			return tema.toLowerCase().indexOf(criterio)>=0;
+		});
+		console.log(temasFiltrados);
+		mostrarTemas(temasFiltrados);*/
+		var b ;
+		$.getJSON(url_api, function (tema) {
+
+    	var temitas = 	tema.filter(function(response){
+    			//console.log(response.content);
+    			return (response.content).toLowerCase().indexOf(criterio)>=0;
+    			});	
+    	mostrarTemas(temitas);
+		});	
+		
   	}
 //Función que muestra los restaurantes Filtrados NO FUNCIONAN
-  	var mostrarTemas = function(temas, criterio){
-  		console.log(temas, criterio);
-  		var temasFiltrados = temas.filter(function(tema){
-  			restaurante.indexOf(criterio)>=0;
-  		})
-
+  	var mostrarTemas = function(temitas){
+  		console.log(temitas);
+  		temitas.forEach(crearTema);
   	}
 $(document).ready(cargarPagina);
 })();
